@@ -19,7 +19,6 @@ function processText() {
     (match) => match[1]
   );
 
-
   if (sessions) {
     let parsedSessions = sessions.map((session) => {
       const splitedLines = session.split("#");
@@ -44,17 +43,25 @@ function processText() {
         (mentor) => mentor.id == selectedCourse.mentor_id
       );
 
+      const sessionLink = selectedCourse?.skyroom; 
+
+      const [startTime, endTime] = convertTimeString(time) || [
+        "00:00",
+        "00:00",
+      ];
       return {
         title,
         date: convertPersianDateToGregorian(date) || date,
-        time,
+        startTime,
+        endTime,
         mentor,
+        sessionLink,
         sessionType,
         sessionTopics: topics,
       };
     });
 
-    outputObject=JSON.stringify(parsedSessions);
+    outputObject = JSON.stringify(parsedSessions);
     document.getElementById("courseTitle").innerText = selectedCourse.title_en;
 
     const tbody = document.querySelector("#output tbody");
@@ -66,7 +73,8 @@ function processText() {
             <td>${index + 1}</td>
             <td>${session?.title}</td>
             <td>${session?.date}</td>
-            <td>${session?.time}</td>
+            <td>${session?.startTime ?? "00:00"}</td>
+            <td>${session?.endTime ?? "00:00"}</td>
             <td>${session?.mentor?.title_fa}</td>
             <td>${session?.sessionLink || "N/A"}</td>
             <td>${session?.sessionType}</td>
@@ -87,25 +95,47 @@ function copyOutput() {
     .catch((err) => console.error("Unable to copy to clipboard", err));
 }
 
+function convertTimeString(input) {
+  if(!input) return;
+  const convertedString = convertPersianNumeralToArabic(input);
+  const timeRegex = /(\d{1,2}):(\d{2})/g;
+  return convertedString.match(timeRegex);
+}
+
 function convertPersianDateToGregorian(input) {
-  const [day, month, year] = input.split(' ');
+  if(!input) return;
+  const [day, month, year] = input.split(" ");
   const monthMap = {
-    'فروردین': '01', 'اردیبهشت': '02', 'خرداد': '03', 'تیر': '04', 'مرداد': '05', 'شهریور': '06',
-    'مهر': '07', 'آبان': '08', 'آذر': '09', 'دی': '10', 'بهمن': '11', 'اسفند': '12'
+    فروردین: "01",
+    اردیبهشت: "02",
+    خرداد: "03",
+    تیر: "04",
+    مرداد: "05",
+    شهریور: "06",
+    مهر: "07",
+    آبان: "08",
+    آذر: "09",
+    دی: "10",
+    بهمن: "11",
+    اسفند: "12",
   };
-  const gregorianDate = `${convertPersianNumeralToArabic(year)}-${monthMap[month]}-${convertPersianNumeralToArabic(day)}`;
+  const gregorianDate = `${convertPersianNumeralToArabic(year)}-${
+    monthMap[month]
+  }-${convertPersianNumeralToArabic(day)}`;
 
   return gregorianDate;
 }
 
 function convertPersianNumeralToArabic(persianNumeral) {
-  const persianDigits = '۰۱۲۳۴۵۶۷۸۹';
+  if(!persianNumeral) return;
+  const persianDigits = "۰۱۲۳۴۵۶۷۸۹";
   return persianNumeral
-    .split('')
-    .map(char => (persianDigits.indexOf(char) !== -1 ? persianDigits.indexOf(char) : char))
-    .join('');
+    .split("")
+    .map((char) =>
+      persianDigits.indexOf(char) !== -1 ? persianDigits.indexOf(char) : char
+    )
+    .join("");
 }
-
 
 const mentorList = [
   {
