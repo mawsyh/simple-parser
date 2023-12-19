@@ -31,7 +31,6 @@ function processText() {
       }
 
       let detailsMatch = session.match(detailsPattern);
-      console.log(detailsMatch);
       let title = detailsMatch[1]?.trim();
       let date = detailsMatch[3]?.trim();
       let time = detailsMatch[4]?.trim();
@@ -47,7 +46,7 @@ function processText() {
 
       return {
         title,
-        date,
+        date: convertPersianDateToGregorian(date) || date,
         time,
         mentor,
         sessionType,
@@ -87,6 +86,26 @@ function copyOutput() {
     .then(() => alert("Output copied to clipboard!"))
     .catch((err) => console.error("Unable to copy to clipboard", err));
 }
+
+function convertPersianDateToGregorian(input) {
+  const [day, month, year] = input.split(' ');
+  const monthMap = {
+    'فروردین': '01', 'اردیبهشت': '02', 'خرداد': '03', 'تیر': '04', 'مرداد': '05', 'شهریور': '06',
+    'مهر': '07', 'آبان': '08', 'آذر': '09', 'دی': '10', 'بهمن': '11', 'اسفند': '12'
+  };
+  const gregorianDate = `${convertPersianNumeralToArabic(year)}-${monthMap[month]}-${convertPersianNumeralToArabic(day)}`;
+
+  return gregorianDate;
+}
+
+function convertPersianNumeralToArabic(persianNumeral) {
+  const persianDigits = '۰۱۲۳۴۵۶۷۸۹';
+  return persianNumeral
+    .split('')
+    .map(char => (persianDigits.indexOf(char) !== -1 ? persianDigits.indexOf(char) : char))
+    .join('');
+}
+
 
 const mentorList = [
   {
