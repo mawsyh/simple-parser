@@ -43,8 +43,6 @@ function processText() {
         (mentor) => mentor.id == selectedCourse.mentor_id
       );
 
-      const sessionLink = selectedCourse?.skyroom; 
-
       const [startTime, endTime] = convertTimeString(time) || [
         "00:00",
         "00:00",
@@ -55,7 +53,7 @@ function processText() {
         startTime,
         endTime,
         mentor,
-        sessionLink,
+        sessionLink: null,
         sessionType,
         sessionTopics: topics,
       };
