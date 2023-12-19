@@ -56,6 +56,7 @@ function processText() {
         sessionLink: null,
         sessionType,
         sessionTopics: topics,
+        session,
       };
     });
 
@@ -87,11 +88,31 @@ function processText() {
 }
 
 function copyOutput() {
+  const parsedOutput = JSON.parse(outputObject);
+
+  parsedOutput.forEach(output => {
+    const topics = removeBeforeHash(output.session);
+    output.sessionTopics = topics;
+    delete output.session;
+  });
+
+  const modifiedOutput = JSON.stringify(parsedOutput, null, 2);
   navigator.clipboard
-    .writeText(outputObject)
+    .writeText(modifiedOutput)
     .then(() => alert("Output copied to clipboard!"))
     .catch((err) => console.error("Unable to copy to clipboard", err));
 }
+
+function removeBeforeHash(inputString) {
+  const indexOfHash = inputString.indexOf('#');
+  if (indexOfHash !== -1) {
+    return inputString.substring(indexOfHash);
+  } else {
+    return "";
+  }
+}
+
+
 
 function convertTimeString(input) {
   if(!input) return;
